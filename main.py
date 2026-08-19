@@ -46,12 +46,22 @@ def handle_key_release(key):
             stream.stop()
             is_recording = False
 
+            if not audio_chunks:
+                print("No audio recorded")
+                return
             recording = np.concatenate(audio_chunks)
-            process_recording(recording)
+            process_recording(recording)   
+
 
 def parse_command(transcript):
     print(transcript)
     words = transcript.split()
+    if len(words) < 2:
+        print("Incomplete command")
+        return None, None
+    if not words:
+        print("No command Recognized")
+        return None, None
     action = words[0]
     target = " ".join(words[1:])
     return action,target   
@@ -72,7 +82,10 @@ def process_recording(recording):
 
 def launch_applcation(app):
     if app["type"] == "executable":
-        subprocess.Popen(app["target"])
+        try:
+            subprocess.Popen(app["target"])
+        except FileNotFoundError:
+            print("Executable could not be found")    
     elif app["type"] == "steam":
         steam_uri = f"steam://rungameid/{app['target']}"
         os.startfile(steam_uri)
