@@ -14,10 +14,15 @@ sample_rate = 16000
 audio_chunks = []
 
 applications = {
-    "deadlock": r"C:\Program Files (x86)\Steam\steamapps\common\Deadlock\game\bin\win64\deadlock.exe",
-    "steam": r"C:\Program Files (x86)\Steam\steam.exe"
+    "deadlock": {"type": "steam",
+                 "target": "1422450"},
+    "steam": {"type":"executable",
+              "target":r"C:\Program Files (x86)\Steam\steam.exe"}
 }
 
+print(applications["deadlock"]["target"])
+
+allowed_actions = ["launch", "open", "start"]
 is_recording = False
 
 def handle_audio(indata, frames, time, status):
@@ -60,13 +65,18 @@ def process_recording(recording):
         text_parts.append(segment.text)
     transcript = " ".join(text_parts).strip().lower().replace(".","").replace(",","")
     action, target = parse_command(transcript)
-    if target in applications:
+    if target in applications and action in allowed_actions:
         launch_applcation(applications[target])
     else:
         print("Application not found")
 
-def launch_applcation(app_path):
-    subprocess.Popen(app_path)
+def launch_applcation(app):
+    if app["type"] == "executable":
+        subprocess.Popen(app["target"])
+    elif app["type"] == "steam":
+        steam_uri = f"steam://rungameid/{app['target']}"
+        os.startfile(steam_uri)
+        #subprocess.Popen(app["target"])
         
 
 
@@ -79,8 +89,6 @@ listener = keyboard.Listener(on_press=handle_key_press, on_release=handle_key_re
 
 print("voice Launcher started")
 listener.start()
-
-print(sd.query_devices())
 
 listener.join()
 
