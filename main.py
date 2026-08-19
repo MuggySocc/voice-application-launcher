@@ -2,6 +2,10 @@ from pynput import keyboard
 import sounddevice as sd
 import numpy as np
 from faster_whisper import WhisperModel
+import os
+import subprocess
+
+os.add_dll_directory(r'C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.8\bin')
 
 model = WhisperModel("base.en", device="cuda")
 
@@ -9,7 +13,10 @@ sample_rate = 16000
 
 audio_chunks = []
 
-
+applications = {
+    "deadlock": r"C:\Program Files (x86)\Steam\steamapps\common\Deadlock\game\bin\win64\deadlock.exe",
+    "steam": r"C:\Program Files (x86)\Steam\steam.exe"
+}
 
 is_recording = False
 
@@ -33,16 +40,35 @@ def handle_key_release(key):
             print(key, "Is being released")
             stream.stop()
             is_recording = False
-            print(len(audio_chunks))
+
             recording = np.concatenate(audio_chunks)
             process_recording(recording)
 
+def parse_command(transcript):
+    print(transcript)
+    words = transcript.split()
+    action = words[0]
+    target = " ".join(words[1:])
+    return action,target   
+
+    
 def process_recording(recording):
+    text_parts = []
     audio = recording.squeeze()
     segments, info = model.transcribe(audio)
     for segment in segments:
-        print(segment.text)
-    
+        text_parts.append(segment.text)
+    transcript = " ".join(text_parts).strip().lower().replace(".","").replace(",","")
+    action, target = parse_command(transcript)
+    if target in applications:
+        launch_applcation(applications[target])
+    else:
+        print("Application not found")
+
+def launch_applcation(app_path):
+    subprocess.Popen(app_path)
+        
+
 
 stream = sd.InputStream(
     samplerate=sample_rate,
@@ -52,7 +78,6 @@ stream = sd.InputStream(
 listener = keyboard.Listener(on_press=handle_key_press, on_release=handle_key_release)     
 
 print("voice Launcher started")
-    
 listener.start()
 
 print(sd.query_devices())
