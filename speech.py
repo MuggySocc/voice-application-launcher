@@ -51,7 +51,7 @@ def process_recording(recording):
     transcript = " ".join(text_parts).strip().lower().replace(".","").replace(",","")
     action, target = commands.parse_command(transcript)
     if target in config.applications and action in config.allowed_actions:
-        launcher.launch_applcation(config.applications[target])
+        launcher.launch_application(config.applications[target])
     else:
         print("Application not found")
 

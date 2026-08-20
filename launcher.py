@@ -1,7 +1,7 @@
 import subprocess
 import os
 
-def launch_applcation(app):
+def launch_application(app):
     if app["type"] == "executable":
         try:
             subprocess.Popen(app["target"])

@@ -4,7 +4,7 @@ from faster_whisper import WhisperModel
 import os
 import speech
 
-os.add_dll_directory(r'C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.8\bin')
+
 
 def handle_key_press(key):
     if key == keyboard.Key.f8:
