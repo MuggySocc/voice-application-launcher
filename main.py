@@ -7,7 +7,7 @@ import subprocess
 
 os.add_dll_directory(r'C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.8\bin')
 
-model = WhisperModel("base.en", device="cuda")
+model = WhisperModel("small.en", device="cuda")
 
 sample_rate = 16000
 
@@ -20,21 +20,24 @@ applications = {
               "target":r"C:\Program Files (x86)\Steam\steam.exe"}
 }
 
-print(applications["deadlock"]["target"])
+alias = {"dead lock": "deadlock"}
+
+hotwords = " ".join(applications.keys())
 
 allowed_actions = ["launch", "open", "start"]
 is_recording = False
 
 def handle_audio(indata, frames, time, status):
-    audio_chunks.append(indata.copy())
-
+    if is_recording:
+        audio_chunks.append(indata.copy())
+    else:
+        return
 def handle_key_press(key):
     global is_recording
     if key == keyboard.Key.f8:
         if not is_recording:
             audio_chunks.clear()
             print(key, "Is being held down")
-            stream.start()
             is_recording = True
             return(is_recording)
 
@@ -43,7 +46,6 @@ def handle_key_release(key):
     if key == keyboard.Key.f8:
         if is_recording:
             print(key, "Is being released")
-            stream.stop()
             is_recording = False
 
             if not audio_chunks:
@@ -64,13 +66,16 @@ def parse_command(transcript):
         return None, None
     action = words[0]
     target = " ".join(words[1:])
-    return action,target   
+    print(target)
+    if target in alias:
+        target = alias[target]
+    return action, target
 
     
 def process_recording(recording):
     text_parts = []
     audio = recording.squeeze()
-    segments, info = model.transcribe(audio)
+    segments, info = model.transcribe(audio,hotwords=hotwords)
     for segment in segments:
         text_parts.append(segment.text)
     transcript = " ".join(text_parts).strip().lower().replace(".","").replace(",","")
@@ -101,6 +106,8 @@ stream = sd.InputStream(
 listener = keyboard.Listener(on_press=handle_key_press, on_release=handle_key_release)     
 
 print("voice Launcher started")
+
+stream.start()
 listener.start()
 
 listener.join()
