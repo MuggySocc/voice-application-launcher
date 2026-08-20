@@ -1,8 +1,10 @@
 import commands
 import config
 import launcher
+import os
 from faster_whisper import WhisperModel
 import numpy as np
+
 
 model = WhisperModel("small.en", device="cuda")
 
@@ -18,6 +20,21 @@ hotwords = " ".join(all_names)
 is_recording = False
 
 audio_chunks = []
+
+def get_cuda():
+    
+    cuda_path = os.environ.get("CUDA_PATH")
+    
+    if cuda_path:
+        cuda_bin = os.path.join(cuda_path, "bin")
+        return cuda_bin
+    else:
+        print("CUDA_PATH not found")
+
+cuda_bin = get_cuda()
+
+if cuda_bin:
+    os.add_dll_directory(cuda_bin)
 
 def handle_audio(indata, frames, time, status):
     if is_recording:
