@@ -3,8 +3,11 @@ import sounddevice as sd
 from faster_whisper import WhisperModel
 import os
 import speech
+import logging
 
+logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(name)s | %(message)s")
 
+logger = logging.getLogger(__name__)
 
 def handle_key_press(key):
     if key == keyboard.Key.f8:
@@ -21,7 +24,7 @@ stream = sd.InputStream(
 )
 listener = keyboard.Listener(on_press=handle_key_press, on_release=handle_key_release)
 
-print("voice Launcher started")
+logger.info("Voice application started")
 
 stream.start()
 listener.start()

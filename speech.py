@@ -4,7 +4,12 @@ import launcher
 import os
 from faster_whisper import WhisperModel
 import numpy as np
+import logging
 
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(name)s | %(message)s")
+
+logger = logging.getLogger(__name__)
 
 model = WhisperModel("small.en", device="cuda")
 
@@ -29,7 +34,7 @@ def get_cuda():
         cuda_bin = os.path.join(cuda_path, "bin")
         return cuda_bin
     else:
-        print("CUDA_PATH not found")
+        logger.error("CUDA_PATH not found")
 
 cuda_bin = get_cuda()
 
