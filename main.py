@@ -9,6 +9,8 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(
 
 logger = logging.getLogger(__name__)
 
+speech.initialize()
+
 def handle_key_press(key):
     if key == keyboard.Key.f8:
         speech.start_recording()
